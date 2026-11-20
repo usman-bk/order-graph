@@ -1,0 +1,33 @@
+{
+  "name": "order-graph",
+  "version": "1.0.0",
+  "description": "A GraphQL API over orders, customers and items, with batching, cost limits and stable paging",
+  "type": "module",
+  "license": "MIT",
+  "private": true,
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "start": "node --experimental-strip-types src/index.ts",
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint src test",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@graphql-tools/schema": "^11.0.9",
+    "dataloader": "^2.2.3",
+    "graphql": "^17.1.0",
+    "graphql-yoga": "^6.1.0",
+    "pg": "^8.23.1"
+  },
+  "devDependencies": {
+    "@eslint/js": "^10.0.1",
+    "@types/node": "^26.6.6",
+    "@types/pg": "^8.23.1",
+    "eslint": "^10.15.0",
+    "typescript": "^6.0.3",
+    "typescript-eslint": "^8.73.0",
+    "vitest": "^5.1.1"
+  }
+}
