@@ -220,6 +220,10 @@ export const resolvers = {
     },
   },
 
+  Item: {
+    priceCents: (i: ItemRow) => i.price_cents,
+  },
+
   OrderLine: {
     item: (l: LineRow, _: unknown, ctx: Context) => ctx.loaders.item.load(l.item_id),
   },
