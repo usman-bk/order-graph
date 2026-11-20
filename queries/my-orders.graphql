@@ -1,0 +1,22 @@
+query MyOrders($first: Int, $after: String) {
+  orders(first: $first, after: $after) {
+    edges {
+      cursor
+      node {
+        id
+        status
+        totalCents
+        lines {
+          quantity
+          item {
+            name
+          }
+        }
+      }
+    }
+    pageInfo {
+      hasNextPage
+      endCursor
+    }
+  }
+}

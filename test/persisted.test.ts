@@ -1,5 +1,7 @@
+import { readFileSync } from "node:fs";
+import { fileURLToPath } from "node:url";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
-import { PersistedQueries, sha256 } from "../src/persisted.ts";
+import { loadPersisted, PersistedQueries, sha256 } from "../src/persisted.ts";
 import { client, pool, seed, tokenFor } from "./helpers.ts";
 
 const db = pool();
@@ -49,5 +51,18 @@ describe("persisted queries", () => {
     const c = client({ db, persisted: s, allowAdhoc: false });
     const res = await c.post(hashBody(sha256(deep)), tokenFor(1));
     expect(res.errors?.[0]?.extensions?.["code"]).toBe("QUERY_TOO_EXPENSIVE");
+  });
+});
+
+describe("the stored query directory", () => {
+  it("loads the shipped queries and runs one by its hash", async () => {
+    const dir = fileURLToPath(new URL("../queries", import.meta.url));
+    const text = readFileSync(`${dir}/my-orders.graphql`, "utf8").trim();
+    const shipped = loadPersisted(dir);
+    expect(shipped.size).toBeGreaterThan(0);
+    const c = client({ db, persisted: shipped, allowAdhoc: false });
+    const res = await c.post({ ...hashBody(sha256(text)), variables: { first: 2 } }, tokenFor(2));
+    expect(res.errors).toBeUndefined();
+    expect(res.data.orders.edges).toHaveLength(2);
   });
 });

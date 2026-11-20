@@ -1,5 +1,6 @@
 import { createServer } from "node:http";
 import { createPool } from "./db.ts";
+import { loadPersisted } from "./persisted.ts";
 import { createApp } from "./server.ts";
 
 const url = process.env["DATABASE_URL"];
@@ -8,6 +9,7 @@ if (!url) throw new Error("DATABASE_URL is required");
 const db = createPool(url);
 const app = createApp({
   db,
+  persisted: loadPersisted(process.env["PERSISTED_QUERY_DIR"] ?? "queries"),
   allowAdhoc: process.env["ALLOW_ADHOC_QUERIES"] === "true",
   onInternalError: (id, err) => console.error(JSON.stringify({ requestId: id, error: String(err) })),
 });

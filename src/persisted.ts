@@ -1,3 +1,5 @@
+import { readdirSync, readFileSync } from "node:fs";
+import { join } from "node:path";
 import { createHash } from "node:crypto";
 import { GraphQLError } from "graphql";
 
@@ -56,4 +58,14 @@ export function resolveQuery(
     });
   }
   return params.query;
+}
+
+// Every .graphql file in the directory becomes one stored query, trimmed so a
+// trailing newline does not change its hash.
+export function loadPersisted(dir: string): PersistedQueries {
+  const store = new PersistedQueries();
+  for (const file of readdirSync(dir).filter((f) => f.endsWith(".graphql")).sort()) {
+    store.add(readFileSync(join(dir, file), "utf8").trim());
+  }
+  return store;
 }
