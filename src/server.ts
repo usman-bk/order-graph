@@ -29,6 +29,19 @@ async function viewerFor(db: Db, request: Request): Promise<Viewer | null> {
   return row ? { id: row.id, isAdmin: row.is_admin } : null;
 }
 
+function withoutSuggestions(err: Error): Error {
+  if (!(err instanceof GraphQLError)) return err;
+  const error = err;
+  const message = error.message.replace(/\s*Did you mean .*$/s, "");
+  if (message === error.message) return error;
+  return new GraphQLError(message, {
+    nodes: error.nodes,
+    source: error.source,
+    positions: error.positions,
+    extensions: error.extensions,
+  });
+}
+
 export function createApp(opts: AppOptions) {
   const schema = buildSchema();
   const limits = opts.limits ?? DEFAULT_LIMITS;
@@ -37,6 +50,13 @@ export function createApp(opts: AppOptions) {
 
   const plugins: Plugin[] = [
     {
+      // graphql-js answers a misspelt field with "Did you mean ...", which
+      // lets a caller map the schema one typo at a time.
+      onValidate() {
+        return ({ result, setResult }) => {
+          setResult(result.map(withoutSuggestions));
+        };
+      },
       onParams({ params, setParams }) {
         const query = resolveQuery(params, store, adhoc);
         setParams({ ...params, query });
