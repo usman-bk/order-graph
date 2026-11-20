@@ -100,7 +100,9 @@ export function encodeCursor(id: string): string {
   return Buffer.from(`id:${id}`).toString("base64url");
 }
 export function decodeCursor(cursor: string): string {
-  return Buffer.from(cursor, "base64url").toString().slice(3);
+  const match = /^id:(\d{1,18})$/.exec(Buffer.from(cursor, "base64url").toString());
+  if (!match) fail("Invalid cursor", "BAD_USER_INPUT");
+  return match[1]!;
 }
 
 function pageSize(first: number): number {
